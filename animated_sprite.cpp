@@ -19,12 +19,13 @@ SDL_Texture* loadTexture(const char *path, SDL_Renderer* renderer) {
     return texture;
 }
 
-AnimatedSprite::AnimatedSprite(vector<string> &images, SDL_Renderer *renderer, bool autoReset) {
+AnimatedSprite::AnimatedSprite(vector<string> &images, SDL_Renderer *renderer, long desiredFrameRate, bool autoReset) {
     for (string &path : images) {
         this->textures.push_back(loadTexture(path.c_str(), renderer));
     }
 
     this->texturesCount = this->textures.size();
+    this->changeTextureAfterSeconds = 1000 / desiredFrameRate;
     this->autoReset = autoReset;
 }
 
@@ -38,8 +39,8 @@ AnimatedSprite::~AnimatedSprite() {
 void AnimatedSprite::update(long deltaTime) {
     this->elapsedTime += deltaTime;
 
-    if (this->elapsedTime > 32l) {
-        long steps = this->elapsedTime / 32l;
+    if (this->elapsedTime > this->changeTextureAfterSeconds) {
+        long steps = this->elapsedTime / this->changeTextureAfterSeconds;
 
         size_t nextIndex = this->currentTextureIndex + steps;
 
@@ -50,7 +51,7 @@ void AnimatedSprite::update(long deltaTime) {
             this->currentTextureIndex = min(nextIndex, this->texturesCount - 1);
         }       
 
-        this->elapsedTime -= steps * 32l;
+        this->elapsedTime -= steps * this->changeTextureAfterSeconds;
     }    
 }
 

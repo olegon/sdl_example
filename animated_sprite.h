@@ -13,9 +13,10 @@ class AnimatedSprite {
         size_t texturesCount = 0;
         size_t currentTextureIndex = 0;
         size_t elapsedTime = 0;
+        size_t changeTextureAfterSeconds = 0;
         bool autoReset = false;
     public:
-        AnimatedSprite(vector<string> &images, SDL_Renderer *renderer, bool autoReset);
+        AnimatedSprite(vector<string> &images, SDL_Renderer *renderer, long desiredFrameRate, bool autoReset);
         ~AnimatedSprite();
         void update(long deltaTime);
         void render(SDL_Renderer *renderer);

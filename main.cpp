@@ -9,7 +9,7 @@ using namespace std;
 #define SCREEN_WIDTH 600
 #define SCREEN_HEIGHT 480
 
-AnimatedSprite* createAnimation(string prefix, string sufix, int count, SDL_Renderer *renderer, bool autoReset);
+AnimatedSprite* createAnimation(string prefix, string sufix, int count, SDL_Renderer *renderer, size_t desiredFrameRate, bool autoReset);
 bool isWalking(const Uint8 *currentKeyStates);
 bool isRunning(const Uint8 *currentKeyStates);
 bool isJumping(const Uint8 *currentKeyStates);
@@ -48,11 +48,11 @@ int main(void) {
         cerr << "Initializing IMG error: " << IMG_GetError();
     }
 
-    AnimatedSprite *idle = createAnimation("./sprites/boy/Idle (", ").png", 15, renderer, true);
-    AnimatedSprite *walk = createAnimation("./sprites/boy/Walk (", ").png", 15, renderer, true);
-    AnimatedSprite *run = createAnimation("./sprites/boy/Run (", ").png", 15, renderer, true);
-    AnimatedSprite *jump = createAnimation("./sprites/boy/Jump (", ").png", 15, renderer, true);
-    AnimatedSprite *dead = createAnimation("./sprites/boy/Dead (", ").png", 15, renderer, false);
+    AnimatedSprite *idle = createAnimation("./sprites/boy/Idle (", ").png", 15, renderer, 30l, true);
+    AnimatedSprite *walk = createAnimation("./sprites/boy/Walk (", ").png", 15, renderer, 30l, true);
+    AnimatedSprite *run = createAnimation("./sprites/boy/Run (", ").png", 15, renderer, 30l, true);
+    AnimatedSprite *jump = createAnimation("./sprites/boy/Jump (", ").png", 15, renderer, 20l, true);
+    AnimatedSprite *dead = createAnimation("./sprites/boy/Dead (", ").png", 15, renderer, 30l, false);
     AnimatedSprite *currentAnimation = idle;
 
     bool quit = false;
@@ -62,6 +62,8 @@ int main(void) {
     long deltaTime = lastTime;
 
     while (!quit) {
+        long startGameLoopTime = SDL_GetTicks();
+        
         SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
         while (SDL_PollEvent(&e) != 0) {
@@ -108,11 +110,18 @@ int main(void) {
 
         SDL_RenderPresent(renderer);
 
+
+        long endGameLoopTime = SDL_GetTicks();
+        long deltaGameLoopTime = endGameLoopTime - startGameLoopTime;
+        if (deltaGameLoopTime < 16l) {
+             SDL_Delay(16l - deltaGameLoopTime); // adjusting to 60 fps...
+        }
+
         long currentTime = SDL_GetTicks();
         deltaTime = currentTime - lastTime;
-        lastTime = currentTime;
+        lastTime = currentTime;        
 
-        SDL_Delay(16l);  
+        cout << deltaTime << endl;
     }
 
     delete idle;
@@ -130,14 +139,14 @@ int main(void) {
     return EXIT_SUCCESS;
 }
 
-AnimatedSprite* createAnimation(string prefix, string sufix, int count, SDL_Renderer *renderer, bool autoReset) {
+AnimatedSprite* createAnimation(string prefix, string sufix, int count, SDL_Renderer *renderer, size_t desiredFrameRate, bool autoReset) {
     vector<string> images;
 
     for (int i = 1; i <= count; i++) {
         images.push_back(prefix + to_string(i) + sufix);
     }
 
-    return new AnimatedSprite(images, renderer, autoReset);
+    return new AnimatedSprite(images, renderer, desiredFrameRate, autoReset);
 }
 
 bool isWalking(const Uint8 *currentKeyStates) {
