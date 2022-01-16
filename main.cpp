@@ -24,6 +24,12 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
+    int imageFlags = IMG_INIT_PNG;
+    if (!(IMG_Init(imageFlags) & imageFlags)) {
+        cerr << "Initializing IMG error: " << IMG_GetError();
+    }
+
+
     window = SDL_CreateWindow(
         "SDL Tutorial",
         SDL_WINDOWPOS_UNDEFINED,
@@ -42,11 +48,7 @@ int main(void) {
         cerr << "Creating renderer error: " << SDL_GetError();
         exit(EXIT_FAILURE);
     }
-
-    int imageFlags = IMG_INIT_PNG;
-    if (!(IMG_Init(imageFlags) & imageFlags)) {
-        cerr << "Initializing IMG error: " << IMG_GetError();
-    }
+   
 
     AnimatedSprite *idle = createAnimation("./sprites/boy/Idle (", ").png", 15, renderer, 30l, true);
     AnimatedSprite *walk = createAnimation("./sprites/boy/Walk (", ").png", 15, renderer, 30l, true);
@@ -59,7 +61,7 @@ int main(void) {
     SDL_Event e;    
 
     long lastTime = SDL_GetTicks();
-    long deltaTime = lastTime;
+    long deltaTime = 0;
 
     while (!quit) {
         long startGameLoopTime = SDL_GetTicks();
@@ -109,7 +111,6 @@ int main(void) {
         currentAnimation->render(renderer);
 
         SDL_RenderPresent(renderer);
-
 
         long endGameLoopTime = SDL_GetTicks();
         long deltaGameLoopTime = endGameLoopTime - startGameLoopTime;
